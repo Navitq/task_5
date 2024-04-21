@@ -1,0 +1,16 @@
+{
+    "main":{
+        "header":"Darmowy generator danych użytkowników",
+        "regionHeader":"Wybór regionu",
+        "regionOption":"Sam wybierz swój region",
+        "ru":"Rosja",
+        "pl":"Polska",
+        "uk":"Wielka Brytania",
+        "mistakesDescr":"Wybierz liczbę błędów na zapis",
+        "index":"Indeks",
+        "id":"ID",
+        "fullName":"Pełna nazwa",
+        "address":"Address",
+        "telephone":"Tel."  
+    }
+}

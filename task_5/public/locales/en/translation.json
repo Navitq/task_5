@@ -1,0 +1,16 @@
+{
+    "main":{
+        "header":"Free user data generator",
+        "regionHeader":"Region selection",
+        "regionOption":"Select your region yourself",
+        "ru":"Russia",
+        "pl":"Poland",
+        "uk":"UK",
+        "mistakesDescr":"Select the number of errors per record",
+        "index":"Index",
+        "id":"ID",
+        "fullName":"Full Name",
+        "address":"Address",
+        "telephone":"Tel."  
+    }
+}
