@@ -50,7 +50,7 @@ function Settings(props) {
 
     }
 
-    function createNewRec(localSeed = seed){
+    function createNewRec(localSeed = seedRef.current.value){
         let fakerReg = defFakerReg();
 
         let seedNumber = Number(localSeed + currentRecPage.current[0].toString());
