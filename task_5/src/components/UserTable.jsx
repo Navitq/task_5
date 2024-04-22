@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState} from "react";
 import { useTranslation } from "react-i18next";
 import { Container, Table } from "react-bootstrap";
 
@@ -12,7 +12,6 @@ export function UserTable(props) {
                 bordered
                 hover
                 size="sm"
-               
             >
                 <thead>
                     <tr>
@@ -24,13 +23,7 @@ export function UserTable(props) {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>Mark</td>
-                        <td>Otto</td>
-                        <td>@mdo</td>
-                        <td>@mdo</td>
-                    </tr>
+                    {props.newData}
                 </tbody>
             </Table>
         </Container>

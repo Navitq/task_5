@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect} from 'react'
 import { Container } from 'react-bootstrap'
 import { Form } from 'react-bootstrap'
 import Button from 'react-bootstrap/Button'
@@ -9,28 +9,30 @@ import { ru, fakerRU } from '@faker-js/faker';
 import { en_GB, fakerEN_GB } from '@faker-js/faker';
 import { pl, fakerPL } from '@faker-js/faker';
 import i18next from 'i18next';
-import { v5 as uuidv5 } from 'uuid';
 
 
 
 
-export function  Settings(props) {
+function Settings(props) {
+    let currentRecPage = useRef([0]);
+
     let seedGenerator = seedrandom();
     let [rangeAmountErr,setRangeAmountErr] = useState(0);
-    let [currentRecPage,setCurrentRecPage] = useState(0);
     let [inptAmountErr,setInptAmountErr] = useState(0);
-    let [seed,setSeed] = useState(1234);
+    let [seed,setSeed] = useState(seedGenerator.int32());
 
-    let uuidNameSpace = '1b671a64-40d5-491e-99b0-da01ff1f3341';
 
     let seedRef = useRef(0);
-    createNewRec()
-    function newFackerSeed(){
-        setCurrentRecPage(0)
-        createNewRec()
-    }
 
-    function defFackerReg(){
+    useEffect(() => {
+        document.addEventListener("scroll",scrooll)
+        createNewRec();
+        return function() {
+            document.removeEventListener("scroll",scrooll)
+        }
+    }, [])
+
+    function defFakerReg(){
         if(i18next.resolvedLanguage == "ru"){
             return fakerRU;
         } else if (i18next.resolvedLanguage == "pl"){
@@ -40,21 +42,39 @@ export function  Settings(props) {
         }
     }
 
-    function createNewRec(){
-        let fakerReg = defFackerReg();
-        let seedNumber = Number(seed + currentRecPage.toString());
+    function scrooll(e){
+        if(e.target.documentElement.scrollHeight -(e.target.documentElement.scrollTop + window.innerHeight) < 150){
+            createNewRec()
+        }
+
+    }
+
+    function createNewRec(localSeed = seed){
+        console.log(currentRecPage.current)
+        let fakerReg = defFakerReg();
+
+        let seedNumber = Number(localSeed + currentRecPage.current[0].toString());
+
         fakerReg.seed(seedNumber+1)
         let fakeData = []
         for (let i = 0; i < 20; i++) {
-            console.log(uuidv5(toString(i+currentRecPage*10)+seed,uuidNameSpace))
-            let town = seed%2==0?fakerReg.location.city():fakerReg.location.country() + ",";
+            let town = fakerReg.location.city() + ", ";
             let streetName = fakerReg.location.street() + " ";
             let streetNumber = fakerReg.location.streetAddress()+" ";
             let telephone = fakerReg.phone.number();
-            fakeData.push([i+currentRecPage*10, uuidv5(toString(i+currentRecPage*10)+seed,uuidNameSpace), fakerReg.person.fullName(),town + streetName + streetNumber, telephone])
+            fakeData.push([i+1+currentRecPage.current[0]*20, faker.string.uuid(), fakerReg.person.fullName(),town + streetName + streetNumber, telephone])
         }
-        //setCurrentRecPage(currentRecPage+1)
-        console.log(fakeData)
+
+        fakeData = createMistakes(fakeData);
+        currentRecPage.current[0] = currentRecPage.current[0] +1;
+        props.newTableData(fakeData,currentRecPage.current[0])
+            
+    }
+
+
+    function createMistakes(fakeData){
+        
+        return fakeData;
     }
 
     
@@ -76,14 +96,20 @@ export function  Settings(props) {
         changeErrAmount(e);
     }
 
-    function createNewSeed(e){
-        setSeed(seedGenerator.int32())
-    }
-    
-    function changeSeed(e){
+    function changeNewSeed(e){
+        currentRecPage.current[0] = 0;
+        console.log(seed)
         setSeed(e.target.value)
-        newFackerSeed()
+        createNewRec(e.target.value)
     }
+
+    function createNewSeed(){
+        let localSeed = seedGenerator.int32();
+        currentRecPage.current[0] = 0;
+        setSeed(localSeed)
+        createNewRec(localSeed)
+    }
+
 
 
     return (
@@ -107,11 +133,12 @@ export function  Settings(props) {
                                 />
                 </Container>
                 <Container className='my-4'>
-                    <Form.Control type="number" ref={seedRef} onChange={changeSeed} value={seed} ></Form.Control>
-                    <Button className='mt-4' onClick={createNewSeed}>Random</Button>
+                    <Form.Control type="number" ref={seedRef} onChange={changeNewSeed} value={seed} ></Form.Control>
+                    <Button name="seedController" className='mt-4' onClick={createNewSeed}>Random</Button>
                 </Container>
             </Container>
         </Container>
     )
 }
 
+export default Settings

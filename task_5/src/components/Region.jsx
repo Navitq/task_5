@@ -8,6 +8,7 @@ export function Region(props) {
 
     function changeRegion(event) {
         setRegionValue(event.target.value);
+        window.location.reload()
         if (event.target.value != "none") {
             props.changeLanguage(event.target.value);
         }
