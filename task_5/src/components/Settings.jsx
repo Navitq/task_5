@@ -15,6 +15,7 @@ import i18next from 'i18next';
 
 function Settings(props) {
     let currentRecPage = useRef([0]);
+    let errRef = useRef([0]);
 
     let seedGenerator = seedrandom();
     let [rangeAmountErr,setRangeAmountErr] = useState(0);
@@ -50,7 +51,6 @@ function Settings(props) {
     }
 
     function createNewRec(localSeed = seed){
-        console.log(currentRecPage.current)
         let fakerReg = defFakerReg();
 
         let seedNumber = Number(localSeed + currentRecPage.current[0].toString());
@@ -62,26 +62,61 @@ function Settings(props) {
             let streetName = fakerReg.location.street() + " ";
             let streetNumber = fakerReg.location.streetAddress()+" ";
             let telephone = fakerReg.phone.number();
-            fakeData.push([i+1+currentRecPage.current[0]*20, faker.string.uuid(), fakerReg.person.fullName(),town + streetName + streetNumber, telephone])
+            fakeData.push([i+1+currentRecPage.current[0]*20, fakerReg.string.uuid(), fakerReg.person.fullName(),town + streetName + streetNumber, telephone])
         }
 
-        fakeData = createMistakes(fakeData);
+        fakeData = definedErr(fakeData, fakerReg);
         currentRecPage.current[0] = currentRecPage.current[0] +1;
         props.newTableData(fakeData,currentRecPage.current[0])
             
     }
 
+    function createMistakes(el,errFull,faker){
+        let values =  {max:99, min:0}
+        for(let i =0;i<errFull;++i){
+            let latterPos = faker.number.int({min:0});
+            let replacementType = faker.number.int(values)%3;
+            let latter = faker.string.alpha();
+            let position = faker.number.int(values)%3;
+            if(position==0){
+                latterPos = latterPos%(el[2].length);
+                let dataArray = el[2].split("");
+                replacementType == 0?  dataArray.splice(latterPos-1,1):replacementType == 1? dataArray.splice(latterPos-1,1,latter):dataArray.splice(latterPos-1,0,latter)
+                el[2] = dataArray.join("");
+            } else if(position==1){
+                latterPos = latterPos%(el[3].length);
+                let dataArray = el[3].split("");
+                replacementType == 0?  dataArray.splice(latterPos-1,1):replacementType == 1? dataArray.splice(latterPos-1,1,latter):dataArray.splice(latterPos-1,0,latter)
+                el[3] = dataArray.join("");
+            } else {
+                latterPos = latterPos%(el[4].length);
+                let dataArray = el[4].split("");
+                replacementType == 0?  dataArray.splice(latterPos-1,1):replacementType == 1? dataArray.splice(latterPos-1,1,latter):dataArray.splice(latterPos-1,0,latter)
+                el[4] = dataArray.join("");
+            }
+        }
+        return el
+    }
 
-    function createMistakes(fakeData){
-        
-        return fakeData;
+
+    function definedErr(fakeData, faker){
+        let errAmnt = Math.trunc(errRef.current[0]);
+        let changedData = fakeData.map((el,index)=>{
+            let value =  (faker.number.int({
+                max:99,
+                min:0
+            }));
+            let errFull = value >  Math.trunc(Math.abs(Number(errRef.current[0])%1/0.25*0.25*100))? errAmnt:errAmnt+1;
+            return createMistakes(el, errFull, faker);
+        })
+        return changedData;
     }
 
     
     function changeErrAmount(e){
-        if(e.target.value < 10){
-            setRangeAmountErr(e.target.value)
+        if(e.target.value <= 10){
             setInptAmountErr(e.target.value)
+            setRangeAmountErr(e.target.value)
         } else {
             setRangeAmountErr(10)
             if(e.target.value>1000){
@@ -89,6 +124,9 @@ function Settings(props) {
             }
             setInptAmountErr(e.target.value)
         }
+        errRef.current[0] = e.target.value;
+        currentRecPage.current[0] = 0;
+        createNewRec()
     }
 
     function fixValue(e){
